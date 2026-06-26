@@ -1,0 +1,84 @@
+# =============================================================
+# AI Software Architect — Application Configuration
+# =============================================================
+# This file configures Spring Boot, the database connection,
+# JPA/Hibernate behavior, JWT settings, and AI API credentials.
+#
+# IMPORTANT: Sensitive values use ${ENV_VAR:default} syntax.
+# In production, set environment variables instead of defaults.
+# =============================================================
+
+spring:
+  application:
+    name: ai-software-architect
+
+  # ---- MySQL Database Connection ----
+  # spring.datasource tells Spring how to connect to MySQL.
+  # - url: JDBC connection string (protocol://host:port/database_name)
+  # - username/password: DB credentials (use env vars in production)
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/ai_architect_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # ---- JPA / Hibernate Settings ----
+  # spring.jpa configures the Object-Relational Mapping (ORM) layer.
+  # - ddl-auto: "update" means Hibernate will auto-create/alter tables
+  #   to match our @Entity classes. Use "validate" in production.
+  # - show-sql: prints SQL statements to console (helpful for debugging)
+  # - dialect: tells Hibernate to generate MySQL-specific SQL
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+  # ---- Jackson JSON Settings ----
+  # Controls how Java objects are serialized to JSON in API responses.
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+# ---- Server Configuration ----
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# ---- JWT Configuration ----
+# Custom properties (not built into Spring) — we read these
+# in our JwtTokenProvider class using @Value annotations.
+app:
+  jwt:
+    secret: ${JWT_SECRET:mySuperSecretKeyForJWTTokenGenerationThatIsAtLeast256BitsLong2024!}
+    expiration-ms: 86400000  # 24 hours in milliseconds
+
+  # ---- Gemini AI Configuration ----
+  gemini:
+    api-key: ${GEMINI_API_KEY:your-api-key-here}
+    model: gemini-2.0-flash
+    api-url: https://generativelanguage.googleapis.com/v1beta/models
+
+# ---- Swagger / OpenAPI Configuration ----
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+# ---- Logging Configuration ----
+# SLF4J + Logback (Spring Boot's default logging framework)
+logging:
+  level:
+    root: INFO
+    com.aiarchitect: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
