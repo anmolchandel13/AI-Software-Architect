@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # =============================================================
+  # MySQL Database Service
+  # =============================================================
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ai_architect_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # =============================================================
+  # Spring Boot Backend API Service
+  # =============================================================
+  backend-api:
+    build:
+      context: ./ai-software-architect-backend
+      dockerfile: Dockerfile
+    container_name: backend-api
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/ai_architect_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - JWT_SECRET=mySuperSecretKeyForJWTTokenGenerationThatIsAtLeast256BitsLong2024!
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - mysql-db
+
+  # =============================================================
+  # React Frontend Client (Nginx Reverse Proxy)
+  # =============================================================
+  frontend-app:
+    build:
+      context: ./ai-software-architect-frontend
+      dockerfile: Dockerfile
+    container_name: frontend-app
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend-api
+
+# =============================================================
+# Volumes definition to persist database storage
+# =============================================================
+volumes:
+  mysql_data:
