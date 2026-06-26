@@ -1,0 +1,31 @@
+# =============================================================
+# DEVELOPMENT PROFILE — Uses H2 In-Memory Database
+# =============================================================
+# Activate this profile by:
+#   1. Setting environment variable: SPRING_PROFILES_ACTIVE=dev
+#   2. Or adding --spring.profiles.active=dev to the run command
+#   3. Or setting it in your IDE run configuration
+# =============================================================
+
+spring:
+  datasource:
+    # MODE=MySQL makes H2 accept MySQL-specific SQL syntax
+    url: jdbc:h2:mem:ai_architect_dev;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        # Use H2 dialect so Hibernate generates H2-compatible SQL
+        dialect: org.hibernate.dialect.H2Dialect
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
